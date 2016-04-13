@@ -104,6 +104,7 @@ fn test_from_file_ok() {
                    dest: "./dest".to_owned(),
                    layouts: "_my_layouts".to_owned(),
                    posts: "_my_posts".to_owned(),
+                   ignore: "jpg".to_owned(),
                    ..Default::default()
                });
 }
