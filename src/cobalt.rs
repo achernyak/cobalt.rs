@@ -16,20 +16,28 @@ use chrono::offset::TimeZone;
 use rss::{Channel, Rss};
 
 macro_rules! walker {
-    ($dir:expr) => {
+    ($dir:expr, $ignore:expr) => {
         WalkDir::new($dir)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|f| {
-                // skip directories
-                f.file_type().is_file()
-                    &&
+                if f.file_type().is_file() {
+                    let file_name = f.path()
+                                    .file_name()
+                                    .and_then(|name| name.to_str())
+                                    .unwrap_or(".");
                     // don't copy hidden files
-                    !f.path()
-                    .file_name()
-                    .and_then(|name| name.to_str())
-                    .unwrap_or(".")
-                    .starts_with(".")
+                    !file_name.starts_with(".")
+                    &&
+                    // don't copy ignored files
+                    if !$ignore.is_empty() {
+                        !file_name.ends_with($ignore)
+                    } else {
+                        true
+                    }
+                } else {
+                    false
+                }
             })
     }
 }
@@ -59,7 +67,7 @@ pub fn build(config: &Config) -> Result<()> {
 
     let mut documents = vec![];
 
-    for entry in walker!(&source) {
+    for entry in walker!(&source, &config.ignore) {
         if template_extensions.contains(&entry.path()
                                               .extension()
                                               .unwrap_or(OsStr::new(""))) &&
@@ -124,7 +132,7 @@ pub fn build(config: &Config) -> Result<()> {
                                     .ok_or(format!("Cannot convert pathname {:?} to UTF-8",
                                                    source)));
 
-        for entry in walker!(&source).filter(|f| {
+        for entry in walker!(&source, &config.ignore).filter(|f| {
             !template_extensions.contains(&f.path()
                                             .extension()
                                             .unwrap_or(OsStr::new(""))) &&
@@ -166,7 +174,7 @@ fn get_layouts(layouts_path: &Path) -> Result<HashMap<String, String>> {
 
     // go through the layout directory and add
     // filename -> text content to the layout map
-    for entry in walker!(layouts_path) {
+    for entry in walker!(layouts_path, &"") {
         let mut text = String::new();
         let mut file = try!(File::open(entry.path()));
         try!(file.read_to_string(&mut text));

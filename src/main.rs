@@ -51,6 +51,7 @@ fn main() {
                 "");
     opts.optopt("p", "posts", "Posts folder, Default: _posts/", "");
     opts.optopt("P", "port", "Port to serve from, Default: 3000", "");
+    opts.optopt("i", "ignore", "Filetype to ignore, Default: None", "");
 
     opts.optflag("", "debug", "Log verbose (debug level) information");
     opts.optflag("", "trace", "Log ultra-verbose (trace level) information");
@@ -131,6 +132,10 @@ fn main() {
 
     if let Some(posts) = matches.opt_str("posts") {
         config.posts = posts;
+    };
+
+    if let Some(ignore) = matches.opt_str("ignore"){
+        config.ignore = ignore;
     };
 
     let command = if !matches.free.is_empty() {

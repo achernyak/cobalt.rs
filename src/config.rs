@@ -11,6 +11,7 @@ pub struct Config {
     pub dest: String,
     pub layouts: String,
     pub posts: String,
+    pub ignore: String,
     pub template_extensions: Vec<String>,
     pub rss: Option<String>,
     pub name: Option<String>,
@@ -25,6 +26,7 @@ impl Default for Config {
             dest: "./".to_owned(),
             layouts: "_layouts".to_owned(),
             posts: "_posts".to_owned(),
+            ignore: "".to_owned(),
             template_extensions: vec!["md".to_owned(), "liquid".to_owned()],
             rss: None,
             name: None,
@@ -69,6 +71,10 @@ impl Config {
             config.posts = posts.to_owned();
         };
 
+        if let Some(ignore) = yaml["ignore"].as_str() {
+            config.ignore = ignore.to_owned();
+        }
+
         if let Some(extensions) = yaml["template_extensions"].as_vec() {
             config.template_extensions = extensions.iter()
                                                    .filter_map(|k| {
@@ -98,6 +104,7 @@ fn test_from_file_ok() {
                    dest: "./dest".to_owned(),
                    layouts: "_my_layouts".to_owned(),
                    posts: "_my_posts".to_owned(),
+                   ignore: "jpg".to_owned(),
                    ..Default::default()
                });
 }
