@@ -16,6 +16,7 @@ pub struct Config {
     pub name: Option<String>,
     pub description: Option<String>,
     pub link: Option<String>,
+    pub ignore: Option<String>,
 }
 
 impl Default for Config {
@@ -30,6 +31,7 @@ impl Default for Config {
             name: None,
             description: None,
             link: None,
+            ignore: None,
         }
     }
 }
