@@ -16,20 +16,28 @@ use chrono::offset::TimeZone;
 use rss::{Channel, Rss};
 
 macro_rules! walker {
-    ($dir:expr) => {
+    ($dir:expr, $ignore:expr) => {
         WalkDir::new($dir)
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|f| {
-                // skip directories
-                f.file_type().is_file()
-                    &&
+                if f.file_type().is_file() {
+                    let file_name = f.path()
+                                    .file_name()
+                                    .and_then(|name| name.to_str())
+                                    .unwrap_or(".");
                     // don't copy hidden files
-                    !f.path()
-                    .file_name()
-                    .and_then(|name| name.to_str())
-                    .unwrap_or(".")
-                    .starts_with(".")
+                    !file_name.starts_with(".")
+                    &&
+                    // don't copy ignored files
+                    if !$ignore.is_empty() {
+                        !file_name.ends_with($ignore)
+                    } else {
+                        true
+                    }
+                } else {
+                    false
+                }
             })
     }
 }

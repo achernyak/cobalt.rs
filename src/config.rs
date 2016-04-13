@@ -11,12 +11,12 @@ pub struct Config {
     pub dest: String,
     pub layouts: String,
     pub posts: String,
+    pub ignore: String,
     pub template_extensions: Vec<String>,
     pub rss: Option<String>,
     pub name: Option<String>,
     pub description: Option<String>,
     pub link: Option<String>,
-    pub ignore: Option<String>,
 }
 
 impl Default for Config {
@@ -26,12 +26,12 @@ impl Default for Config {
             dest: "./".to_owned(),
             layouts: "_layouts".to_owned(),
             posts: "_posts".to_owned(),
+            ignore: "".to_owned(),
             template_extensions: vec!["md".to_owned(), "liquid".to_owned()],
             rss: None,
             name: None,
             description: None,
             link: None,
-            ignore: None,
         }
     }
 }
@@ -70,6 +70,10 @@ impl Config {
         if let Some(posts) = yaml["posts"].as_str() {
             config.posts = posts.to_owned();
         };
+
+        if let Some(ignore) = yaml["ignore"].as_str() {
+            config.ignore = ignore.to_owned();
+        }
 
         if let Some(extensions) = yaml["template_extensions"].as_vec() {
             config.template_extensions = extensions.iter()
