@@ -53,7 +53,7 @@ pub fn build(config: &Config) -> Result<()> {
     debug!("Layouts directory: {:?}", layouts_path);
     debug!("Posts directory: {:?}", posts_path);
 
-    let layouts = try!(get_layouts(&layouts_path));
+    let layouts = try!(get_layouts(&layouts_path, config));
 
     let mut documents = vec![];
 
@@ -180,12 +180,12 @@ fn get_file_name(file: &DirEntry) -> &str {
 /// This walks the specified directory recursively
 ///
 /// Returns a map filename -> content
-fn get_layouts(layouts_path: &Path) -> Result<HashMap<String, String>> {
+fn get_layouts(layouts_path: &Path, config: &Config) -> Result<HashMap<String, String>> {
     let mut layouts = HashMap::new();
 
     // go through the layout directory and add
     // filename -> text content to the layout map
-    for entry in walker!(layouts_path, &"") {
+    for entry in walker!(layouts_path, &config.ignore) {
         let mut text = String::new();
         let mut file = try!(File::open(entry.path()));
         try!(file.read_to_string(&mut text));
