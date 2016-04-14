@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use liquid::Value;
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 use document::Document;
 use error::{Error, Result};
 use config::Config;
@@ -22,19 +22,9 @@ macro_rules! walker {
             .filter_map(|e| e.ok())
             .filter(|f| {
                 if f.file_type().is_file() {
-                    let file_name = f.path()
-                                    .file_name()
-                                    .and_then(|name| name.to_str())
-                                    .unwrap_or(".");
-                    // don't copy hidden files
-                    !file_name.starts_with(".")
-                    &&
-                    // don't copy ignored files
-                    if !$ignore.is_empty() {
-                        !file_name.ends_with($ignore)
-                    } else {
-                        true
-                    }
+                    let file_name = get_file_name(f);
+
+                    should_skip(file_name, $ignore)
                 } else {
                     false
                 }
@@ -163,6 +153,27 @@ pub fn build(config: &Config) -> Result<()> {
     }
 
     Ok(())
+}
+
+/// Checks if a file name should be skiped
+fn should_skip(file_name: &str, ignore: &str) -> bool {
+    // don't copy hidden files
+    !file_name.starts_with(".")
+    &&
+    // don't copy ignored files
+    if !ignore.is_empty() {
+        !file_name.ends_with(ignore)
+    } else {
+        true
+    }
+}
+
+/// Gets apropriate file name from file
+fn get_file_name(file: &DirEntry) -> &str {
+    file.path()
+    .file_name()
+    .and_then(|name| name.to_str())
+    .unwrap_or(".")
 }
 
 /// Gets all layout files from the specified path (usually _layouts/)
